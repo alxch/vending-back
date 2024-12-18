@@ -20,4 +20,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api', apiRouter);
 
+// start STM driver
+const stm = require('./stm');
+stm.start();
+
 module.exports = app;
