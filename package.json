@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./www",
     "prod": "node ./back.js",
     "build": "webpack --config webpack.config.js",
     "pack": "tar cvzf ../build.tar.gz back.js front"

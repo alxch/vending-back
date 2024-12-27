@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   target: 'node', 
-  entry: './bin/www', 
+  entry: './www', 
   output: {
     filename: 'back.js',
     path: path.resolve(__dirname, './'),

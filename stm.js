@@ -1,16 +1,16 @@
 const { SerialPort } = require('serialport');
-const path = '/dev/ttyUSB0';
-const baudRate = 115200;
 
 const stm = {
-  port: null,
-  start(){
-    const port = stm.port = new SerialPort({ path, baudRate });
-    
-    port.on('error', error => console.log('STM error:', error.message));
-    port.on('data', data => console.log('STM data:', data));
-    
-    port.write('Hello from RPI');
+  /** @type {SerialPort} */
+  port: null, 
+  start({ path, baudRate }){
+    this.port = new SerialPort({ path, baudRate });
+    this.port.on('error', error => console.log('STM error:', error.message));
+    this.port.on('data', data => console.log('STM data:', data));
+    this.port.write('Hello from RPI');
+  },
+  sel({col, row, count}){
+    this.port.write();
   }
 };
 
