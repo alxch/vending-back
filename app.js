@@ -15,11 +15,11 @@ app.use(express.static(path.join(__dirname, 'front')));
 
 app.use('/api', apiRouter);
 
-// get config
+// start devices
 var config = require('./config.json');
-
-// start STM driver
-const stm = require('./stm');
-stm.start(config.stm);
+const Stm = require('./stm');
+const stm = new Stm(config.stm);
+// const Bill = require('./bill');
+// const bill = new Stm(config.bill);
 
 module.exports = app;

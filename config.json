@@ -1,9 +1,11 @@
 {
   "stm": {
+    "name": "Stm",
     "baudRate": 9600,
     "path": "/dev/ttyUSB0" 
   },
   "bill": {
+    "name": "Bill",
     "baudRate": 115200,
     "path": "/dev/ttyUSB1" 
   }

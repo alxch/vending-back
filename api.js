@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var cors = require('cors');
-// var stm = require('./stm');
+// const stm = require('./stm');
 
 router.use(cors());
 
