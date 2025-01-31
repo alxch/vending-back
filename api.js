@@ -2,46 +2,44 @@ var express = require('express');
 var router = express.Router();
 var cors = require('cors');
 // const stm = require('./stm');
-
 router.use(cors());
+router.use(function (req, res, next) {
+  console.log('Req: body=',req.body, 'params=',req.params, 'query=', req.query);
+  next();
+});
 
-const max_attempts = 2;
-let attempts = max_attempts;
-const send = (data, res) => {
-  if(attempts > 0){
-    attempts--;
-    data = {status:'processing'};
-  }
-  else {
-    attempts = max_attempts;
-  }
-  res.send(JSON.stringify(data));
+const delay = (seconds=1) => new Promise(resolve=>setTimeout(resolve,1000*seconds));
+let item = {key:'',price:'',name:'',src:''};
+let paymentMethod = '';
+const paymentDetails = {
+  cash:{amount:0,status:false},
+  payme:{link:'',status:false},
 };
 
-router.post('/cancel', async (req, res) => {
-  attempts = max_attempts;
-});
-
 router.post('/select-item', async (req, res) => {
-  send({
+  item = req.body;
+  await delay();
+  res.send(JSON.stringify({
+    item,
     status: 'done'
-  },res);
+  }));
 });
 
-router.get('/payment-links', async (req, res) => {
-  send({
-    status: 'done', 
-    payme: 'https://payme.uz/home/main',
-    click: 'https://click.uz/ru',
-    uzum: 'https://uzumbank.uz/en'
-  },res);
+router.post('/select-payment-method', async (req, res) => {
+  paymentMethod = req.body.paymentMethod;
+  await delay();
+  res.send(JSON.stringify({
+    paymentMethod,
+    status: 'done'
+  }));
 });
 
-router.get('/payment-status', async (req, res) => {
-  send({
-    status: 'done',
-    method: 'payme'
-  },res);
+router.get('/payment-details', async (req, res) => {
+  await delay();
+  res.send(JSON.stringify({
+    paymentDetails,
+    status: 'processing'
+  }));
 });
 
 module.exports = router;

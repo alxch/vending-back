@@ -16,10 +16,10 @@ app.use(express.static(path.join(__dirname, 'front')));
 app.use('/api', apiRouter);
 
 // start devices
-var config = require('./config.json');
-const Stm = require('./stm');
-const stm = new Stm(config.stm);
+// var config = require('./config.json');
+// const Stm = require('./stm');
+// const stm = new Stm(config.stm);
 // const Bill = require('./bill');
-// const bill = new Stm(config.bill);
+// const bill = new Bill(config.bill);
 
 module.exports = app;

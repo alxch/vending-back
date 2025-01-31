@@ -10,6 +10,8 @@ class Serial{
   /** @type {Number} */
   baudRate = null;
   
+  data = Buffer.alloc(0);
+
   constructor({ name, path, baudRate }){
     this.name = name;
     this.path = path;
@@ -24,7 +26,7 @@ class Serial{
       
       this.port.on('open', () => { 
         console.log(`${this.name} opened`); 
-        resolve(`${this.name} opened`);
+        resolve();
       });
       this.port.on('data', data => {
         // just log
@@ -46,14 +48,7 @@ class Serial{
     })
   }
 
-  async read(){
-    return await new Promise((resolve,reject) => {
-      this.port.once('error', reject);
-      this.port.once('data', resolve);
-    });
-  }
-
-  readAsync(onData, onError){
+  readAsync({onData, onError}){
     this.port.once('error', error => {
       onError(error);
       this.port.un('data', onData);
