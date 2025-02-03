@@ -10,27 +10,24 @@ class Stm extends Serial {
       await this.write(Buffer.from([cmd,row,col]));
       
       /** @type {Buffer} */
-      res.push(await new Promise((resolve,reject)=>{
-        let data = Buffer.alloc(0);
-        const stop = this.readAsync({onData: chunk=>{
-          data = Buffer.concat([data,chunk]);
-          if(data.length < 3) return;
-          // store extra data into this.data 
+      let data = Buffer.alloc(0);
+      while(data.length < 3){
+        data = Buffer.concat([data, await this.read()]);
+      }
+      if(data.length > 3){
+        // TODO: parse protocol
+        throw new Error(`${this.name}:SEL too much (>3) data received ${data}`);
+      }
+      this.readLength = 3;
 
-          if(data[0] != cmd) {
-            stop();
-            reject(new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`));
-            return;
-          };
-          if(data[1] != 0x01) {
-            stop();
-            reject(new Error(`${this.name}:SEL returned withe error ${data[1]}`));
-            return;
-          }
-          stop();
-          resolve(data);
-        }, onError: reject}); // on read error
-      }));
+      if(data[0] != cmd) {
+        throw new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`);
+      };
+      if(data[1] != 0x01) {
+        throw new Error(`${this.name}:SEL returned withe error ${data[1]}`);
+      }
+
+      res.push(data);
       console.log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
     
