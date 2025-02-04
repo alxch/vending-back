@@ -14,7 +14,7 @@ class Stm extends Serial {
       while(data.length < 2){
         data = Buffer.concat([data, await this.read()]);
       }
-      // // TODO: parse protocol
+      // TODO: parse protocol
       // if(data.length > 2){
       //   throw new Error(`${this.name}:SEL too much (>2) data received ${data}`);
       // }

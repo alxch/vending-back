@@ -9,12 +9,12 @@ router.use(cors());
 var config = {
   "stm": {
     "name": "Stm",
-    "baudRate": 9600,
+    "baudRate": 115200,
     "path": "/dev/ttyUSB0" 
   },
   "bill": {
     "name": "Bill",
-    "baudRate": 115200,
+    "baudRate": 9600,
     "path": "/dev/ttyUSB1" 
   }
 };
