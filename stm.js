@@ -11,14 +11,14 @@ class Stm extends Serial {
       
       /** @type {Buffer} */
       let data = Buffer.alloc(0);
-      while(data.length < 3){
+      while(data.length < 2){
         data = Buffer.concat([data, await this.read()]);
       }
-      if(data.length > 3){
-        // TODO: parse protocol
-        throw new Error(`${this.name}:SEL too much (>3) data received ${data}`);
-      }
-      this.readLength = 3;
+      // // TODO: parse protocol
+      // if(data.length > 2){
+      //   throw new Error(`${this.name}:SEL too much (>2) data received ${data}`);
+      // }
+      this.readLength = 2;
 
       if(data[0] != cmd) {
         throw new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`);

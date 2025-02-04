@@ -16,7 +16,7 @@ class Bill extends Serial {
         console.log(`${this.name}:ACCEPT ${data}:${data.toString()}`);
         
         // TODO: get denomination of the banknote
-        // this.emit('accept', 1000);
+        this.emit('accept', 1000);
       }
     }
   }
