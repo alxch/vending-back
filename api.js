@@ -21,7 +21,7 @@ let payment = {
   cash:{amount:0,done:false},
   payme:{link:'https://payme.uz/?',done:false},
 };
-let cashTimer = null; 
+// let cashTimer = null; 
 let paymeTimer = null;
 
 // let deliveryTimer = null;
@@ -99,7 +99,14 @@ router.post('/select-payment-method', async (req, res) => {
           log(`Cash:`, payment.cash);
           break;
         }
-        await bill.activate();
+
+        await bill.activate({accept:(amount)=>{
+          payment.cash.amount+= 1000;
+          if(payment.cash.amount >= item.price){
+            bill.deactivate();
+            payment.cash.done = true;
+          }
+        }});
         // cashTimer = setInterval(()=>{
         //   payment.cash.amount+= 1000;
         //   if(payment.cash.amount >= item.price){
@@ -115,17 +122,20 @@ router.post('/select-payment-method', async (req, res) => {
         // TODO:
         // stop bill acceptor (don't clear amount), generate link, start checking status
         // if payment confirmed - set status 'done', stop bill (clear amount) /cancel receipt, and start delivering item
-        if(cashTimer) {
-          payment.cash.amount = payment.cash.amount; 
-          clearInterval(cashTimer);
-          cashTimer = null;
-        }
+        
+        await bill.deactivate();
+        // if(cashTimer) {
+        //   payment.cash.amount = payment.cash.amount; 
+        //   clearInterval(cashTimer);
+        //   cashTimer = null;
+        // }
         const link = payment.payme.link; 
         if(link.length - link.indexOf('?') >= 4){
           payment.payme.done = true;
           log(`Payme:`, payment.payme);
           break;
         }
+
         paymeTimer = setInterval(()=>{
           payment.payme.link+= '0';
           const link = payment.payme.link; 
@@ -143,10 +153,13 @@ router.post('/select-payment-method', async (req, res) => {
           clearInterval(paymeTimer);
           paymeTimer = null;
         }
-        if(cashTimer) {
-          clearInterval(cashTimer);
-          cashTimer = null;
-        }
+        
+        await bill.deactivate();
+        // if(cashTimer) {
+        //   clearInterval(cashTimer);
+        //   cashTimer = null;
+        // }
+        
         payment.payme.link = 'https://payme.uz/?';
         payment.cash.done = false;
         payment.payme.done = false;
@@ -158,8 +171,9 @@ router.post('/select-payment-method', async (req, res) => {
     }));
   }
   catch(error){
+    console.error('Select payment method error:', error);
     res.send(JSON.stringify({
-      error,
+      error: error.message,
       status: 'error'
     }));
   }
@@ -183,6 +197,7 @@ router.post('/deliver-item', async (req, res) => {
     res.send(JSON.stringify({itemDelivered, status: 'done'}));
   }
   catch(error){
+    console.error('Deliver item:', error);
     itemDelivered = error;
     res.send(JSON.stringify({error: itemDelivered.message, status: 'error'}));
   }

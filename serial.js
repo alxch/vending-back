@@ -18,10 +18,11 @@ class Serial extends EventEmitter{
   parser = null;
 
   readPromise = {resolve:null, reject: null};
-  readEnable = false;
+  readEnable = true;
 
-  constructor({ name, path, baudRate, parser, autoStart, readEnable }){
+  constructor({ name, path, baudRate, parser, autoStart, readEnable = true }){
     super();
+    this.readEnable = readEnable; 
     this.name = name || path;
     this.parser = parser || null;
     if(!path ||  !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);

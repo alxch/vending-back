@@ -18,7 +18,7 @@ class Stm extends Serial {
     const cmd = 0x01;
     /** @type {Buffer[]} */
     const res = [];
-
+    await this.flush();
     for(let item = 0; item < count; item++){
       await this.write(Buffer.from([cmd,row,col]));
       
@@ -35,7 +35,6 @@ class Stm extends Serial {
       res.push(true);
       log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
-    await this.flush();
 
     return res;
   }
