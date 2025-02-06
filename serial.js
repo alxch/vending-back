@@ -1,4 +1,6 @@
 const { SerialPort } = require('serialport');
+const { Transform } = require('stream');
+const log = console.log;
 
 class Serial{
   /** @type {SerialPort} */
@@ -9,54 +11,53 @@ class Serial{
   path = null;
   /** @type {Number} */
   baudRate = null;
-  /** @type {Buffer} */
-  data = Buffer.alloc(0);
-  readResolve = null;
-  readReject = null;
-  wasRead = false;
-  readLength = 0; // set outside after actual data use
+  /** @type {Buffer[]} */
+  packets = [];
+  /** @type {Transform} */
+  parser = null;
 
-  constructor({ name, path, baudRate }){
-    this.name = name;
+  readPromise = {resolve:null, reject: null};
+
+  constructor({ name, path, baudRate, parser, autoStart }){
+    this.name = name || path;
+    this.parser = parser || null;
+    if(!path ||  !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);
     this.path = path;
     this.baudRate = baudRate;
-    // auto-start
-    this.start({path, baudRate}).then(console.log,console.log);
+    if(autoStart){
+      this.start().then(log,log);
+    }
   }
 
-  async start({ path, baudRate }){
+  async start(){
+    if(this.port) throw new Error(`${this.name} port already opened`);
+    
     return await new Promise((resolve,reject) => {
-      this.port = new SerialPort({ path, baudRate, autoOpen: false });
+      this.port = new SerialPort({ path:this.path, baudRate:this.baudRate, autoOpen: false });
       
       this.port.once('open', () => { 
-        console.log(`${this.name} opened`); 
+        log(`${this.name} opened.`); 
         resolve();
       });
 
-      this.port.on('data', data => {
-        console.log(`${this.name} data:`, data);
-        if(this.wasRead){
-          // init
-          this.data = Buffer.concat([this.data.subarray(this.readLength, this.data.length), data]);
-          this.wasRead = false;
-        } else {
-          // concat
-          this.data = Buffer.concat([this.data, data]);
+      const onRead = data => {
+        log(`${this.name} read data:`, data);
+        this.packets.push(data);
+        if(this.readPromise.resolve){
+          this.readPromise.resolve(this.packets.shift());
+          this.readPromise.resolve = null;
         }
-        
-        // resolve if needed
-        if(this.readPromise){
-          this.readPromise.resolve(Buffer.from(this.data));
-          this.wasRead = true;
-          this.readPromise = null;
-        }
-      });
+      };
+      if(this.parser)
+        this.port.pipe(this.parser).on('data', onRead);
+      else
+        this.port.on('data', onRead);
 
       this.port.on('error', error => { 
-        console.log(`${this.name} error:`, error.message); 
-        if(this.readReject){
-          this.readReject(error);
-          this.readReject = null;
+        log(`${this.name} error:`, error.message); 
+        if(this.readPromise.reject){
+          this.readPromise.reject(error);
+          this.readPromise.reject = null;
         }
         reject(error); // once
       });
@@ -66,24 +67,37 @@ class Serial{
   }
 
   async write(data){
-    if(!this.port || !this.port.isOpen) throw new Error(`${this.name} port is closed`); 
+    if(!this.port || !this.port.isOpen) {
+      throw new Error(`${this.name} port is closed`);
+    }
     return await new Promise((resolve,reject) => {
-      this.port.write(data, error => error ? reject(error) : resolve());
+      log(`${this.name} write data:`, data);
+      const result = this.port.write(data, error => error ? reject(error) : resolve(result));
     })
   }
 
   /**
    * @returns {Promise<Buffer>}
    */
-  async read(){
-    if(this.data.length > 0 && !this.wasRead){
-      this.wasRead = true;
-      return Promise.resolve(Buffer.from(this.data));
+  async read(timeout = 5000){
+    if(!this.port || !this.port.isOpen) {
+      throw new Error(`${this.name} port is closed`);
+    }
+
+    if(this.packets.length > 0){
+      return Promise.resolve(this.packets.shift());
     } else {
-      return new Promise((resolve, reject)=>{
-        this.readResolve = resolve;
-        this.readReject = reject;
-      })
+      return Promise.race([
+        new Promise((resolve, reject)=>{
+          this.readPromise = {resolve, reject};
+        }),
+        new Promise((resolve, reject)=>{
+          setTimeout(()=>{
+            this.readPromise = {resolve: null, reject: null};
+            reject(new Error(`${this.name} read timeout`));
+          }, timeout);
+        })
+      ])
     }
   }
 }

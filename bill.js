@@ -3,6 +3,10 @@ const Serial = require('./serial');
 class Bill extends Serial {
   accepting = false;
 
+  constructor(params){
+    super({...params, parser: new ByteLengthParser({ length: 2 })});
+  }
+
   // TODO: use generator instead of events
   async accept(){
     this.accepting = true;
@@ -11,7 +15,7 @@ class Bill extends Serial {
       data = Buffer.concat([data, await this.read()]);
       const idx = data.indexOf(Buffer.from('0d0a','hex'));
       if(idx != -1){
-        this.readLength = idx + 2;
+        // this.readLength = idx + 2;
         data = data.subarray(0, idx);
         console.log(`${this.name}:ACCEPT ${data}:${data.toString()}`);
         

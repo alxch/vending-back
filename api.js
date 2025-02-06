@@ -1,21 +1,24 @@
-var express = require('express');
-var router = express.Router();
-var cors = require('cors');
+const express = require('express');
+const router = express.Router();
+const cors = require('cors');
+const log = console.log;
 router.use(cors());
 // router.use(async (req, res, next) => {
 //   next();
 // });
 
-var config = {
+const Config = {
   "stm": {
     "name": "Stm",
     "baudRate": 115200,
-    "path": "/dev/ttyUSB0" 
+    "path": "/dev/ttyUSB0",
+    "autoStart": true 
   },
   "bill": {
     "name": "Bill",
     "baudRate": 9600,
-    "path": "/dev/ttyUSB1" 
+    "path": "/dev/ttyUSB1",
+    "autoStart": true 
   }
 };
 const Stm = require('./stm');
@@ -23,10 +26,10 @@ const Bill = require('./bill');
 
 // TODO: 
 // start devices
-// const stm = new Stm(config.stm);
-// const bill = new Bill(config.bill);
-// const PaymentMethods = ['cash','payme'];
+const stm = new Stm(Config.stm);
+// const bill = new Bill(Config.bill);
 
+// const PaymentMethods = ['cash','payme'];
 let item = {key:'',price:'',name:'',src:''};
 let itemDelivered = false; // Boolean | Error
 let payment = {
@@ -43,7 +46,7 @@ const deliver = () => {
   deliveryTimer = setTimeout(()=>{
     reset();
     itemDelivered = true; // new Error('Cannot deliver'); 
-    console.log(`ItemDelivered:`, itemDelivered, '\n');
+    log(`ItemDelivered:`, itemDelivered, '\n');
     deliveryTimer = null;
   }, 3000);
 };
@@ -55,7 +58,7 @@ const reset = () => {
     cash:{amount:0,done:false},
     payme:{link:'https://payme.uz/?',done:false},
   };
-  console.log(`Item:`, item, `Payment:`, payment);
+  log(`Item:`, item, `Payment:`, payment);
 };
 
 // select item
@@ -63,7 +66,7 @@ router.post('/select-item', async (req, res) => {
   if(!(itemDelivered instanceof Error)){
     item = req.body;
     itemDelivered = false;
-    console.log(`Item:`, item, 'ItemDelivered:', itemDelivered);
+    log(`Item:`, item, 'ItemDelivered:', itemDelivered);
   }
   res.send(JSON.stringify({
     item,
@@ -75,7 +78,7 @@ router.post('/select-item', async (req, res) => {
 router.post('/reset', async (req, res) => {
   reset();
   itemDelivered = false;
-  console.log('ItemDelivered:', itemDelivered);
+  log('ItemDelivered:', itemDelivered);
   res.send(JSON.stringify({
     status: 'done'
   }));
@@ -93,7 +96,7 @@ router.post('/select-payment-method', async (req, res) => {
     return;
   }
   payment.method = req.body.paymentMethod;
-  console.log(`Payment method:`, payment.method);
+  log(`Payment method:`, payment.method);
 
   await new Promise(resolve=>setTimeout(resolve,500));
   switch(payment.method){
@@ -108,7 +111,7 @@ router.post('/select-payment-method', async (req, res) => {
       }
       if(payment.cash.amount >= item.price){
         payment.cash.done = true;
-        console.log(`Cash:`, payment.cash);
+        log(`Cash:`, payment.cash);
         break;
       }
       cashTimer = setInterval(()=>{
@@ -118,7 +121,7 @@ router.post('/select-payment-method', async (req, res) => {
           cashTimer = null;
           payment.cash.done = true;
         }
-        console.log(`Cash:`, payment.cash);
+        log(`Cash:`, payment.cash);
       }, 2000);
     break;
     
@@ -134,7 +137,7 @@ router.post('/select-payment-method', async (req, res) => {
       const link = payment.payme.link; 
       if(link.length - link.indexOf('?') >= 4){
         payment.payme.done = true;
-        console.log(`Payme:`, payment.payme);
+        log(`Payme:`, payment.payme);
         break;
       }
       paymeTimer = setInterval(()=>{
@@ -145,7 +148,7 @@ router.post('/select-payment-method', async (req, res) => {
           paymeTimer = null;
           payment.payme.done = true;
         }
-        console.log(`Payme:`, payment.payme);
+        log(`Payme:`, payment.payme);
       }, 2000);
     break;
 
@@ -161,7 +164,7 @@ router.post('/select-payment-method', async (req, res) => {
       payment.payme.link = 'https://payme.uz/?';
       payment.cash.done = false;
       payment.payme.done = false;
-      console.log(`Payment:`, payment);
+      log(`Payment:`, payment);
   }
 
   res.send(JSON.stringify({

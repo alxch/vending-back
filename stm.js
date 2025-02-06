@@ -1,8 +1,13 @@
+const { ByteLengthParser } = require('serialport');
 const Serial = require('./serial');
+const log = console.log;
 
 class Stm extends Serial {
-  async sel({row=1, col=1, count=1}={}){
-    console.log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
+  constructor(params){
+    super({...params, parser: new ByteLengthParser({ length: 2 })});
+  }
+  async sel({row=1, col=1, count=1}){
+    log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
     const cmd = 0x01;
     const res = [];
 
@@ -10,15 +15,7 @@ class Stm extends Serial {
       await this.write(Buffer.from([cmd,row,col]));
       
       /** @type {Buffer} */
-      let data = Buffer.alloc(0);
-      while(data.length < 2){
-        data = Buffer.concat([data, await this.read()]);
-      }
-      // TODO: parse protocol
-      // if(data.length > 2){
-      //   throw new Error(`${this.name}:SEL too much (>2) data received ${data}`);
-      // }
-      this.readLength = 2;
+      let data = await this.read();
 
       if(data[0] != cmd) {
         throw new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`);
@@ -28,7 +25,7 @@ class Stm extends Serial {
       }
 
       res.push(data);
-      console.log(`${this.name}:SEL ${item+1} of ${count} selected`);
+      log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
     
     return res;
