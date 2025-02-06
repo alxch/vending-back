@@ -9,36 +9,47 @@ const config = {
 
 class Bill extends Serial {
   constructor(){
-    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
+    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }),
+      readEnable: false
+    });
   }
   
-  accepting = false;
-  // TODO: use generator (for data/error/ending) instead of events
-  async accept(){
-    while(this.accepting){
+  acceptReject = null;
+  async activate(){
+    if(this.acceptReject) throw new Error(`${this.name} already activated.`);
+
+    console.log(`${this.name}:ACTIVATE`);
+    await this.write(Buffer.from('34001f0000','hex'));
+    this.readEnable = true;
+
+    while(true){
       try{
-        const data = await this.read(30); // 30 sec.
+        const data = await Promise.race([
+          this.read(), new Promise((resolve,reject)=>{
+            this.acceptReject = reject;
+          })
+        ]);
         // TODO: get denomination of the banknote
-        console.log(`${this.name}:ACCEPT ${data}`);
-        this.emit('accept', 1000);
+        console.log(`${this.name}:ACCEPT ${data.toString()}`);
+        // this.emit('accept', 1000);
       }
       catch(error){
-        console.error(error);
-        // repeat accept
+        // console.log(`${this.name}:`, error);
+        if(error === 'DEACTIVATE') return true;
       }
     }
   }
 
-  async activate(){
-    console.log(`${this.name}:ACTIVATE`);
-    this.accepting = true;
-    await this.write(Buffer.from('34001f0000','hex'));
-    this.accept();
-  }
-
   async deactivate(){
+    if(!this.acceptReject) throw new Error(`${this.name} already deactivated.`);
+
     console.log(`${this.name}:DEACTIVATE`);
-    this.accepting = false;
+    if(this.acceptReject) {
+      this.acceptReject('DEACTIVATE');
+      this.acceptReject = null;
+    }
+    this.readEnable = false;
+    this.packets = [];
     await this.write(Buffer.from('3400000000','hex'));
   }
 }

@@ -18,8 +18,9 @@ class Serial extends EventEmitter{
   parser = null;
 
   readPromise = {resolve:null, reject: null};
+  readEnable = false;
 
-  constructor({ name, path, baudRate, parser, autoStart }){
+  constructor({ name, path, baudRate, parser, autoStart, readEnable }){
     super();
     this.name = name || path;
     this.parser = parser || null;
@@ -39,14 +40,17 @@ class Serial extends EventEmitter{
       
       this.port.once('open', () => { 
         log(`${this.name} opened.`); 
-        resolve();
+        resolve(true);
       });
 
       const onRead = data => {
-        log(`${this.name} read data:`, data);
+        if(!this.readEnable) return;
+        log(`${this.name} data:`, data);
         this.packets.push(data);
         if(this.readPromise.resolve){
-          this.readPromise.resolve(this.packets.shift());
+          const data = this.packets.shift();
+          log(`${this.name} read:`, data);
+          this.readPromise.resolve(data);
           this.readPromise.resolve = null;
         }
       };
@@ -69,25 +73,40 @@ class Serial extends EventEmitter{
   }
 
   async write(data){
+    this.check();
+    return await new Promise((resolve,reject) => {
+      log(`${this.name} write:`, data);
+      const result = this.port.write(data, error => error ? reject(error) : resolve(result));
+    })
+  }
+
+  check(){
     if(!this.port || !this.port.isOpen) {
       throw new Error(`${this.name} port is closed`);
     }
-    return await new Promise((resolve,reject) => {
-      log(`${this.name} write data:`, data);
-      const result = this.port.write(data, error => error ? reject(error) : resolve(result));
-    })
+  }
+
+  async flush(){
+    this.check();
+    if(this.parser){
+      await new Promise(resolve => this.parser._flush(resolve));
+      this.parser.position = 0;
+    }
+    await new Promise(resolve => this.port.flush(resolve));
+    this.packets = [];
+    log(`${this.name} flushed`);
   }
 
   /**
    * @returns {Promise<Buffer>}
    */
   async read(timeout = 5){
-    if(!this.port || !this.port.isOpen) {
-      throw new Error(`${this.name} port is closed`);
-    }
+    this.check();
 
     if(this.packets.length > 0){
-      return Promise.resolve(this.packets.shift());
+      const data = this.packets.shift();
+      log(`${this.name} read:`, data);
+      return Promise.resolve(data);
     } else {
       return Promise.race([
         new Promise((resolve, reject)=>{

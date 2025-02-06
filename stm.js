@@ -2,7 +2,7 @@ const { ByteLengthParser } = require('serialport');
 const Serial = require('./serial');
 const log = console.log;
 const config = {
-  "name": "Stm",
+  "name": "STM",
   "baudRate": 115200,
   "path": "/dev/ttyUSB0",
   "autoStart": true 
@@ -12,9 +12,11 @@ class Stm extends Serial {
   constructor(){
     super({...config, parser: new ByteLengthParser({ length: 2 })});
   }
+  /** @returns {Promise<Buffer[]>} */
   async sel({row=1, col=1, count=1}){
     log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
     const cmd = 0x01;
+    /** @type {Buffer[]} */
     const res = [];
 
     for(let item = 0; item < count; item++){
@@ -30,10 +32,11 @@ class Stm extends Serial {
         throw new Error(`${this.name}:SEL returned withe error ${data[1]}`);
       }
 
-      res.push(data);
+      res.push(true);
       log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
-    
+    await this.flush();
+
     return res;
   }
 };
