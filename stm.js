@@ -1,10 +1,16 @@
 const { ByteLengthParser } = require('serialport');
 const Serial = require('./serial');
 const log = console.log;
+const config = {
+  "name": "Stm",
+  "baudRate": 115200,
+  "path": "/dev/ttyUSB0",
+  "autoStart": true 
+};
 
 class Stm extends Serial {
-  constructor(params){
-    super({...params, parser: new ByteLengthParser({ length: 2 })});
+  constructor(){
+    super({...config, parser: new ByteLengthParser({ length: 2 })});
   }
   async sel({row=1, col=1, count=1}){
     log(`${this.name}:SEL row:${row},col:${col},count:${count}`);

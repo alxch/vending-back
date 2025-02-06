@@ -7,27 +7,11 @@ router.use(cors());
 //   next();
 // });
 
-const Config = {
-  "stm": {
-    "name": "Stm",
-    "baudRate": 115200,
-    "path": "/dev/ttyUSB0",
-    "autoStart": true 
-  },
-  "bill": {
-    "name": "Bill",
-    "baudRate": 9600,
-    "path": "/dev/ttyUSB1",
-    "autoStart": true 
-  }
-};
-const Stm = require('./stm');
-const Bill = require('./bill');
-
-// TODO: 
 // start devices
-const stm = new Stm(Config.stm);
-// const bill = new Bill(Config.bill);
+const Stm = require('./stm');
+const stm = new Stm();
+const Bill = require('./bill');
+const bill = new Bill();
 
 // const PaymentMethods = ['cash','payme'];
 let item = {key:'',price:'',name:'',src:''};

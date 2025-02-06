@@ -1,8 +1,9 @@
+const EventEmitter = require('events');
 const { SerialPort } = require('serialport');
 const { Transform } = require('stream');
 const log = console.log;
 
-class Serial{
+class Serial extends EventEmitter{
   /** @type {SerialPort} */
   port = null;
   /** @type {String} */
@@ -19,6 +20,7 @@ class Serial{
   readPromise = {resolve:null, reject: null};
 
   constructor({ name, path, baudRate, parser, autoStart }){
+    super();
     this.name = name || path;
     this.parser = parser || null;
     if(!path ||  !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);
@@ -79,7 +81,7 @@ class Serial{
   /**
    * @returns {Promise<Buffer>}
    */
-  async read(timeout = 5000){
+  async read(timeout = 5){
     if(!this.port || !this.port.isOpen) {
       throw new Error(`${this.name} port is closed`);
     }
@@ -95,7 +97,7 @@ class Serial{
           setTimeout(()=>{
             this.readPromise = {resolve: null, reject: null};
             reject(new Error(`${this.name} read timeout`));
-          }, timeout);
+          }, timeout*1000);
         })
       ])
     }

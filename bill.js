@@ -1,34 +1,41 @@
+const { DelimiterParser } = require('@serialport/parser-delimiter');
 const Serial = require('./serial');
+const config = {
+  "name": "Bill",
+  "baudRate": 9600,
+  "path": "/dev/ttyUSB0",
+  "autoStart": true
+};
 
 class Bill extends Serial {
-  accepting = false;
-
-  constructor(params){
-    super({...params, parser: new ByteLengthParser({ length: 2 })});
+  constructor(){
+    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
   }
-
-  // TODO: use generator instead of events
+  
+  accepting = false;
+  // TODO: use generator (for data/error/ending) instead of events
   async accept(){
-    this.accepting = true;
-    let data = Buffer.alloc(0);
     while(this.accepting){
-      data = Buffer.concat([data, await this.read()]);
-      const idx = data.indexOf(Buffer.from('0d0a','hex'));
-      if(idx != -1){
-        // this.readLength = idx + 2;
-        data = data.subarray(0, idx);
-        console.log(`${this.name}:ACCEPT ${data}:${data.toString()}`);
-        
+      try{
+        const data = await this.read(30); // 30 sec.
         // TODO: get denomination of the banknote
+        console.log(`${this.name}:ACCEPT ${data}`);
         this.emit('accept', 1000);
+      }
+      catch(error){
+        console.error(error);
+        // repeat accept
       }
     }
   }
+
   async activate(){
     console.log(`${this.name}:ACTIVATE`);
+    this.accepting = true;
     await this.write(Buffer.from('34001f0000','hex'));
     this.accept();
   }
+
   async deactivate(){
     console.log(`${this.name}:DEACTIVATE`);
     this.accepting = false;
