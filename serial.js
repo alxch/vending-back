@@ -25,7 +25,7 @@ class Serial extends EventEmitter{
     this.readEnable = readEnable; 
     this.name = name || path;
     this.parser = parser || null;
-    if(!path ||  !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);
+    if(!path || !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);
     this.path = path;
     this.baudRate = baudRate;
     if(autoStart){
@@ -46,7 +46,7 @@ class Serial extends EventEmitter{
 
       const onRead = data => {
         if(!this.readEnable) return;
-        log(`${this.name} data:`, data);
+        log(`${this.name} data:`, data, '\x1b[32m\x1b[1m"'+data.toString()+'"\x1b[0m');
         this.packets.push(data);
         if(this.readPromise.resolve){
           const data = this.packets.shift();

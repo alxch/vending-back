@@ -3,14 +3,14 @@ const Serial = require('./serial');
 const config = {
   "name": "Bill",
   "baudRate": 9600,
-  "path": "/dev/ttyUSB1",
+  "path": "/dev/ttyUSB0",
   "autoStart": true
 };
 
 class Bill extends Serial {
   constructor(){
     super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }),
-      readEnable: false
+      // readEnable: false
     });
   }
   
@@ -19,9 +19,11 @@ class Bill extends Serial {
     if(this.acceptReject) return;
 
     console.log(`${this.name}:ACTIVATE`);
+    await this.flush();
     await this.write(Buffer.from('34001f0000','hex'));
-    this.packets = [];
-    this.readEnable = true;
+    // this.readEnable = true;
+    const data = (await this.read()).toString();
+    if(data != 'FF ') throw new Error(`${this.name}:ACTIVATE expected 'FF ', recived ${data}`);
 
     // may be separate function
     setTimeout(async()=>{

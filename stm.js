@@ -4,7 +4,7 @@ const log = console.log;
 const config = {
   "name": "STM",
   "baudRate": 115200,
-  "path": "/dev/ttyUSB0",
+  "path": "/dev/ttyUSB1",
   "autoStart": true 
 };
 
@@ -15,10 +15,11 @@ class Stm extends Serial {
   /** @returns {Promise<Buffer[]>} */
   async sel({row=1, col=1, count=1}){
     log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
+    await this.flush();
+    
     const cmd = 0x01;
     /** @type {Buffer[]} */
     const res = [];
-    await this.flush();
     for(let item = 0; item < count; item++){
       await this.write(Buffer.from([cmd,row,col]));
       
