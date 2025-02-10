@@ -9,9 +9,7 @@ const config = {
 
 class Bill extends Serial {
   constructor(){
-    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }),
-      // readEnable: false
-    });
+    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
   }
   
   acceptReject = null;
@@ -19,9 +17,8 @@ class Bill extends Serial {
     if(this.acceptReject) return;
 
     console.log(`${this.name}:ACTIVATE`);
-    await this.flush();
+    await this.enableRead();
     await this.write(Buffer.from('34001f0000','hex'));
-    // this.readEnable = true;
     const data = (await this.read()).toString();
     if(data != 'FF ') throw new Error(`${this.name}:ACTIVATE expected 'FF ', recived ${data}`);
 
@@ -56,7 +53,7 @@ class Bill extends Serial {
       this.acceptReject = null;
     }
     await this.write(Buffer.from('3400000000','hex'));
-    this.readEnable = false;
+    await this.disableRead();
   }
 }
 

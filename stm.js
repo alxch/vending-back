@@ -15,7 +15,7 @@ class Stm extends Serial {
   /** @returns {Promise<Buffer[]>} */
   async sel({row=1, col=1, count=1}){
     log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
-    await this.flush();
+    await this.enableRead();
     
     const cmd = 0x01;
     /** @type {Buffer[]} */
@@ -37,6 +37,7 @@ class Stm extends Serial {
       log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
 
+    await this.disableRead();
     return res;
   }
 };

@@ -16,13 +16,11 @@ class Serial extends EventEmitter{
   packets = [];
   /** @type {Transform} */
   parser = null;
-
+  /** @type {{resolve:Function|null,reject.Function|null}} */
   readPromise = {resolve:null, reject: null};
-  readEnable = true;
 
-  constructor({ name, path, baudRate, parser, autoStart, readEnable = true }){
+  constructor({ name, path, baudRate, parser, autoStart }){
     super();
-    this.readEnable = readEnable; 
     this.name = name || path;
     this.parser = parser || null;
     if(!path || !baudRate) throw new Error(`Path and Baudrate for "${name}" should be specified`);
@@ -30,6 +28,36 @@ class Serial extends EventEmitter{
     this.baudRate = baudRate;
     if(autoStart){
       this.start().then(log,log);
+    }
+  }
+
+  async disableRead(){
+    this.check();
+    
+    if(this.parser)
+      this.port.pipe(this.parser).removeListener('data', this.onRead);
+    else
+      this.port.removeListener('data', this.onRead);
+  }
+
+  async enableRead(){
+    this.check();
+    await this.flush();
+
+    if(this.parser)
+      this.port.pipe(this.parser).on('data', this.onRead);
+    else
+      this.port.on('data', this.onRead);
+  }
+
+  onRead(data){
+    log(`${this.name} data:`, data, '\x1b[32m\x1b[1m"'+data.toString()+'"\x1b[0m');
+    this.packets.push(data);
+    if(this.readPromise.resolve){
+      const data = this.packets.shift();
+      log(`${this.name} read:`, data);
+      this.readPromise.resolve(data);
+      this.readPromise.resolve = null;
     }
   }
 
@@ -43,22 +71,6 @@ class Serial extends EventEmitter{
         log(`${this.name} opened.`); 
         resolve(true);
       });
-
-      const onRead = data => {
-        if(!this.readEnable) return;
-        log(`${this.name} data:`, data, '\x1b[32m\x1b[1m"'+data.toString()+'"\x1b[0m');
-        this.packets.push(data);
-        if(this.readPromise.resolve){
-          const data = this.packets.shift();
-          log(`${this.name} read:`, data);
-          this.readPromise.resolve(data);
-          this.readPromise.resolve = null;
-        }
-      };
-      if(this.parser)
-        this.port.pipe(this.parser).on('data', onRead);
-      else
-        this.port.on('data', onRead);
 
       this.port.on('error', error => { 
         log(`${this.name} error:`, error.message); 
