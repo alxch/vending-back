@@ -12,9 +12,11 @@ class Bill extends Serial {
     super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
   }
   
+  isActive = () => this.acceptReject != null;
   acceptReject = null;
+  
   async activate({accept}){
-    if(this.acceptReject) return;
+    if(this.isActive()) throw new Error(`${this.name}:ACTIVATE already activated`);
 
     console.log(`${this.name}:ACTIVATE`);
     await this.enableRead();
@@ -45,7 +47,7 @@ class Bill extends Serial {
   }
 
   async deactivate(){
-    if(!this.acceptReject) return;
+    if(!this.isActive()) throw new Error(`${this.name}:ACTIVATE already deactivated`);;
 
     console.log(`${this.name}:DEACTIVATE`);
     if(this.acceptReject) {

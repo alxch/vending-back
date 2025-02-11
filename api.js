@@ -19,9 +19,8 @@ let itemDelivered = false; // Boolean | Error
 let payment = {
   method: '',
   cash:{amount:0,done:false},
-  payme:{link:'https://payme.uz/?',done:false},
+  payme:{link:'',done:false},
 };
-// let cashTimer = null; 
 let paymeTimer = null;
 
 // let deliveryTimer = null;
@@ -39,8 +38,8 @@ const reset = () => {
   item = {key:'',price:'',name:'',src:''};
   payment = {
     method: '',
-    cash:{amount:0,done:false},
-    payme:{link:'https://payme.uz/?',done:false},
+    cash:{amount:0,done:false,error:null},
+    payme:{link:'',done:false,error:null},
   };
   log(`Item:`, item, `Payment:`, payment);
 };
@@ -90,32 +89,29 @@ router.post('/select-payment-method', async (req, res) => {
         // start bill acceptor, clear links, cancel receipt (to be sure not to pay twice), start checking amount
         // if payment confirmed - set status 'done', stop bill (clear amount) /cancel receipt, and start delivering item
         if(paymeTimer) {
-          payment.payme.link = 'https://payme.uz/?';
+          payment.payme.link = '';
           clearInterval(paymeTimer);
           paymeTimer = null;
         }
-        if(payment.cash.amount >= item.price){
-          payment.cash.done = true;
-          log(`Cash:`, payment.cash);
-          break;
-        }
 
-        await bill.activate({accept:(amount)=>{
-          payment.cash.amount+= 1000;
+        const checkBill = async () => {
           if(payment.cash.amount >= item.price){
-            bill.deactivate();
             payment.cash.done = true;
+            log(`Cash:`, payment.cash);
+            
+            if(bill.isActive()){
+              await bill.deactivate();
+            }
+            return true;
           }
+        }
+        if(await checkBill()) break;
+
+        if(bill.isActive()) break;
+        await bill.activate({accept:(amount)=>{
+          payment.cash.amount+= amount;
+          checkBill();
         }});
-        // cashTimer = setInterval(()=>{
-        //   payment.cash.amount+= 1000;
-        //   if(payment.cash.amount >= item.price){
-        //     clearInterval(cashTimer);
-        //     cashTimer = null;
-        //     payment.cash.done = true;
-        //   }
-        //   log(`Cash:`, payment.cash);
-        // }, 2000);
       break;
       
       case 'payme': 
@@ -123,28 +119,26 @@ router.post('/select-payment-method', async (req, res) => {
         // stop bill acceptor (don't clear amount), generate link, start checking status
         // if payment confirmed - set status 'done', stop bill (clear amount) /cancel receipt, and start delivering item
         
-        await bill.deactivate();
-        // if(cashTimer) {
-        //   payment.cash.amount = payment.cash.amount; 
-        //   clearInterval(cashTimer);
-        //   cashTimer = null;
-        // }
-        const link = payment.payme.link; 
-        if(link.length - link.indexOf('?') >= 4){
-          payment.payme.done = true;
-          log(`Payme:`, payment.payme);
-          break;
-        }
+        if(bill.isActive()) await bill.deactivate();
+
+        const checkLink = () => {
+          const link = payment.payme.link; 
+          if(link.length >= 3){
+            payment.payme.done = true;
+            log(`Payme:`, payment.payme);
+            return true;
+          } else {
+            payment.payme.link+= '0';
+            log(`Payme:`, payment.payme);
+          }
+        };
+        if(checkLink()) break;
 
         paymeTimer = setInterval(()=>{
-          payment.payme.link+= '0';
-          const link = payment.payme.link; 
-          if(link.length - link.indexOf('?') >= 4){
+          if(checkLink()){
             clearInterval(paymeTimer);
             paymeTimer = null;
-            payment.payme.done = true;
           }
-          log(`Payme:`, payment.payme);
         }, 2000);
       break;
 
@@ -154,17 +148,18 @@ router.post('/select-payment-method', async (req, res) => {
           paymeTimer = null;
         }
         
-        await bill.deactivate();
-        // if(cashTimer) {
-        //   clearInterval(cashTimer);
-        //   cashTimer = null;
-        // }
+        if(bill.isActive()) await bill.deactivate();
         
-        payment.payme.link = 'https://payme.uz/?';
+        payment.payme.link = '';
         payment.cash.done = false;
         payment.payme.done = false;
+        payment.cash.error = payment.payme.error = null;
         log(`Payment:`, payment);
     }
+    if(payment.method){
+      payment[payment.method].error = null;
+    }
+    
     res.send(JSON.stringify({
       payment,
       status: 'done'
@@ -172,6 +167,10 @@ router.post('/select-payment-method', async (req, res) => {
   }
   catch(error){
     console.error('Select payment method error:', error);
+    if(payment.method){
+      payment[payment.method].error = error.message;
+    }
+    
     res.send(JSON.stringify({
       error: error.message,
       status: 'error'
