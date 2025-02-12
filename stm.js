@@ -7,16 +7,25 @@ const config = {
   "path": "/dev/ttyUSB1",
   "autoStart": true 
 };
+const DEBUG = true;
 
 class Stm extends Serial {
   constructor(){
     super({...config, parser: new ByteLengthParser({ length: 2 })});
   }
-  /** @returns {Promise<Buffer[]>} */
+
+  /** @returns {Promise<Boolean[]>} */
   async sel({row=1, col=1, count=1}){
     log(`${this.name}:SEL row:${row},col:${col},count:${count}`);
-    await this.enableRead();
-    
+    if(DEBUG) {
+      return await new Promise(resolve=>{
+        setTimeout(()=>{
+          resolve(new Array(count).fill(true));
+        }, 2000);
+      })
+    }
+    await this.enableRead(); // flush
+
     const cmd = 0x01;
     /** @type {Buffer[]} */
     const res = [];

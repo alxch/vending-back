@@ -121,6 +121,7 @@ class Serial extends EventEmitter{
       log(`${this.name} read:`, data);
       return Promise.resolve(data);
     } else {
+      if(!timeout) return Buffer.alloc(0);
       return Promise.race([
         new Promise((resolve, reject)=>{
           this.readPromise = {resolve, reject};
