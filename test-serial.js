@@ -6,14 +6,13 @@ const test = new Serial({
   name: 'Test',
   path: '/dev/ttyUSB0',
   baudRate: 9600,
-  parser: new DelimiterParser({ delimiter: '\r\n' }),
+  // parser: new DelimiterParser({ delimiter: '\r\n' }),
   // parser: new ByteLengthParser({ length: 2 }),
-  // autoStart: true,
+  autoStart: true,
 });
 
 (async()=>{
-  await test.start();
+  // await test.start();
   await test.write(Buffer.from('34001f0000','hex'));
-  await test.write(Buffer.from('3400000000','hex'));
   await test.read();
 })();
