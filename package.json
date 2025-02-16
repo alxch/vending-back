@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "start": "node ./www",
-    "prod": "node ./back.js",
-    "build": "webpack --config webpack.config.js",
-    "pack": "tar cvzf ../build.tar.gz back.js front"
+    "build": "ncc build www -m -o build",
+    "pack": "mkdir -p ../release && cp -rf build/* ../release && mkdir -p ../prebuilds && cp -rf node_modules/@serialport/bindings-cpp/prebuilds/* ../prebuilds",
+    "update": "npm install git+ssh://git@github.com:alxch/node-cashcode-bv.git"
   },
   "dependencies": {
+    "cashcode-bv": "github:alxch/node-cashcode-bv",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
@@ -18,7 +19,6 @@
     "serialport": "^12.0.0"
   },
   "devDependencies": {
-    "webpack": "^5.97.1",
-    "webpack-cli": "^5.1.4"
+    "@vercel/ncc": "^0.38.3"
   }
 }

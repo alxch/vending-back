@@ -11,7 +11,8 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'front')));
+const staticPath = path.join(__dirname, '');
+app.use(express.static(staticPath));
 
 app.use('/api', apiRouter);
 

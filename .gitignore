@@ -1,5 +1,6 @@
-# front
-back.js*
+build/
+node
+package-lock.json
 
 # Logs
 logs
