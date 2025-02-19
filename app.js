@@ -4,6 +4,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var apiRouter = require('./api');
+var setupRouter = require('./setup');
 
 var app = express();
 
@@ -15,5 +16,6 @@ const staticPath = path.join(__dirname, '');
 app.use(express.static(staticPath));
 
 app.use('/api', apiRouter);
+app.use('/setup/api', setupRouter);
 
 module.exports = app;
