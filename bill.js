@@ -1,23 +1,29 @@
-const { DelimiterParser } = require('@serialport/parser-delimiter');
-const Serial = require('./serial');
-const Action = require('./action');
+// const { DelimiterParser } = require('@serialport/parser-delimiter');
+// const Serial = require('./serial');
+const { BillValidator } = require('cashcode-bv');
+const log = console.log;
 
 const config = {
   "name": "Bill",
-  "baudRate": 9600,
   "path": "/dev/ttyUSB0",
-  "autoStart": true
 };
 const DEBUG = true;
 
-class Bill extends Serial {
+class Bill extends BillValidator /* Serial */ {
   constructor(){
-    super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
+    // super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }));
+    super(config.path, true);
+    this.name = config.name;
+    if(DEBUG) return;
+
+    this.connect().then(async()=>{
+      log(`${this.name} info:`, this.info);
+      log(`${this.name} billTable:`, this.billTable);
+    },log);
   }
 
-  /** @type {Action} */
-  action = null;
-  isActive = () => this.action && this.action.isActive();
+  active = false;
+  isActive = () => this.active;
 
   async activate({onAccept}){
     if(this.isActive()) throw new Error(`${this.name}:ACTIVATEd already`);
@@ -25,51 +31,40 @@ class Bill extends Serial {
     if(DEBUG){
       await new Promise(resolve=>setTimeout(resolve,2000));
     } else {
-      await this.enableRead(); // flush
-      await this.write(Buffer.from('34001f0000','hex'));
-      // TODO: read response
-      // const data = (await this.read()).toString();
-      // if(data != 'FF ') {
-      //   throw new Error(`${this.name}:ACTIVATE expected 'FF ', recived ${data}`);
-      // }
+      await this.begin();
     }
+    this.active = true;
     console.log(`${this.name}:ACTIVATEd`);
 
-    // constructor
-    this.action = new Action(async()=>{
-      try{
-        // don't wait, so can be deactivated w/o read wait
-        const data = DEBUG ? await new Promise(resolve=>{
-          setTimeout(()=>{
-            resolve(Buffer.from('DEBUG'));
-          }, 2000);
-        }) : await this.read(0);
-        if(!this.isActive()) return true;
-        
-        // TODO: get denomination of the banknote
-        console.log(`${this.name}:ACCEPTed ${data.toString()}`);
-        if(onAccept && await onAccept(DEBUG ? 1000 : 0/*TODO*/)){
-          await this.deactivate();
-          return true;
-        };
-      }
-      catch(error){
-        console.log(`${this.name}:ACCEPT`, error);
-      }
-    }, 20);
+    if(DEBUG){
+      const pay = ()=>{
+        setTimeout(async ()=>{
+          if(!this.isActive()) return;
+          const bill = 1000;
+          console.log(`${this.name}:ACCEPTed ${bill}`);
+          if(onAccept && (await onAccept(bill) == '=')){
+            await this.deactivate();
+          } else {
+            pay();
+          };
+        }, 2000);
+      };
+      pay();
+      return;
+    }
+
+    
   }
 
   async deactivate(){
     if(!this.isActive()) throw new Error(`${this.name}:DEACTIVATEd already`);
 
-    this.action.stop();
     if(DEBUG){
       await new Promise(resolve=>setTimeout(resolve,2000));
     } else {
-      await this.write(Buffer.from('3400000000','hex'));
-      // TODO: read response
-      await this.disableRead();
+      await this.end();
     }
+    this.active = false;
     console.log(`${this.name}:DEACTIVATEd`);
   }
 }

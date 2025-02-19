@@ -7,7 +7,7 @@ const config = {
   "path": "/dev/ttyUSB1",
   "autoStart": true 
 };
-const DEBUG = true;
+const DEBUG = false;
 
 class Stm extends Serial {
   constructor(){

@@ -1,12 +1,19 @@
 const Action = require('./action');
+const {LocalStorage} = require('node-localstorage');
 
 const log = console.log;
-const baseUrl = 'https://checkout.test.paycom.uz/api';
-const xAuth = '5e730e8e0b852a417aa49ceb:ZPDODSiTYKuX0jyO7Kl2to4rQbNwG08jbghj';
-const DEBUG = {
-  maxAttempts: 4,
-  attempt: 0
-};
+const baseUrl = 'https://checkout.paycom.uz/api';
+const xAuth = '679b64f7320c36e44dec1fe6:zMPpdcgykB2Ksu&g2Np12#i&uH#mx#Z8hMxE';
+const DEBUG = false; 
+// const DEBUG = {
+//   maxAttempts: 4,
+//   attempt: 0
+// };
+const localStorage = new LocalStorage('data/payme');
+const config = {
+  get order_id(){ return Number(localStorage.getItem('order_id')) },
+  set order_id(value){ localStorage.setItem('order_id', value) },
+}
 
 class Payme {
   _id = '';
@@ -106,7 +113,7 @@ class Payme {
         params: {
           amount: item.price * 100,
           account: {
-            order_id: 1 // random
+            order_id: String(config.order_id++).padStart(5, '0') 
           },
           // "detail": {
           //   "receipt_type": 0,

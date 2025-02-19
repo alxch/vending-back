@@ -23,7 +23,7 @@ let payment = null;
 
 // init vars.
 const initVars = () => {
-  item = {key:'',price:'',name:'',src:''};
+  item = {key:'',price:'',name:'',src:'',sold:'',count:''};
   payment = {
     method: '',
     cash: {amount:0,done:false,error:null},
@@ -79,19 +79,27 @@ router.post('/select-payment-method', async (req, res) => {
           await payme.cancel();
         }
 
-        const onAccept = async(amount=0)=>{
+        const onAccept = async(amount)=>{
           payment.cash.amount+= amount;
           log(`Cash ammount:`, payment.cash.amount);
 
-          if(payment.cash.amount < item.price) 
-            return false;
+          if(payment.cash.amount < item.price){ 
+            payment.cash.error = null;
+            return '<';
+          }
+          else if(payment.cash.amount > item.price){
+            payment.cash.amount-= amount;
+            payment.cash.error = `Too big value ${amount}`;
+            return '>';
+          }
           else {
+            payment.cash.error = null;
             payment.cash.done = true;
             log(`Cash:`, payment.cash);
-            return true;
+            return '=';
           }
         };
-        if(payment.cash.amount > 0 && await onAccept()) break;
+        if(payment.cash.amount > 0 && await onAccept(0)) break;
 
         // start
         if(bill.isActive()) break;
@@ -124,12 +132,13 @@ router.post('/select-payment-method', async (req, res) => {
         if(bill.isActive()) await bill.deactivate();
         payment.cash.amount = payment.cash.amount;
         payment.cash.done = false;
-  
+        payment.cash.error = null;
+
         if(payme.isActive()) await payme.cancel();
         payment.payme.link = '';
         payment.payme.done = false;
+        payment.payme.error = null;
 
-        payment.cash.error = payment.payme.error = null;
         log(`Payment:`, payment);
     }
 

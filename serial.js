@@ -101,6 +101,7 @@ class Serial extends EventEmitter{
 
   async flush(){
     this.check();
+    
     if(this.parser){
       await new Promise(resolve => this.parser._flush(resolve));
       this.parser.position = 0;
