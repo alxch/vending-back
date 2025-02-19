@@ -15,6 +15,7 @@ class Bill extends Serial {
     super({...config, parser: new DelimiterParser({ delimiter: '\r\n' })});
   }
 
+  /** @type {Action} */
   action = null;
   isActive = () => this.action && this.action.isActive();
 

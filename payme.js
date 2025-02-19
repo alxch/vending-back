@@ -40,6 +40,7 @@ class Payme {
 
   async cancel(){
     if(!this.isActive()) throw new Error('Payme:CANCEL not yet created');
+    this.action.stop();
 
     const result = await this.request({
       body: {
@@ -57,7 +58,7 @@ class Payme {
 
     log(`Payme:CANCEL state=${result.receipt.state}`);
     this._id = '';
-    this.action.stop();
+    
     return result['receipt']['state'];
   }
 
