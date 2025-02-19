@@ -96,4 +96,5 @@ FirewallRuleSet users-to-router {
   FirewallRule allow tcp port 22 to 10.42.0.1
 }
 
+sudo nodogsplash -f
 ```
