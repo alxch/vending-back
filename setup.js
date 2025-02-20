@@ -7,25 +7,11 @@ const logError = (...args) => {
   console.error(`\x1b[31m${args[0]}\x1b[0m`, ...args.slice(1));
 }
 router.use(cors());
-const {LocalStorage} = require('node-localstorage');
-const localStorage = new LocalStorage(__dirname+'/data');
 
-// TODO: move to user.js and '/api/user' ep.
-let user = JSON.parse(localStorage.getItem('user.json'));
-if(!user){
-  // default
-  user = {
-    login: 'admin',
-    pass: 'SWG*setup',
-    token: ''
-  };
-  localStorage.setItem('user.json', JSON.stringify(user));
-}
-
+const user = require('./user');
 let loginInProgress = '';
-log('User:', user);
-log('LoginInProgress:', loginInProgress);
-  
+log(`LoginInProgress: "${loginInProgress}"`);
+
 // TODO: handle unhandled errors
 router.post('/logout', async (req, res) => {
   const {login} = req.body;

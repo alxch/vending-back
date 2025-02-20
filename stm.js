@@ -4,7 +4,7 @@ const log = console.log;
 const config = {
   "name": "STM",
   "baudRate": 115200,
-  "path": "/dev/ttyUSB1",
+  "path": require('./config.json').stm.path,
   "autoStart": true 
 };
 const DEBUG = false;

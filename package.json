@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./www",
-    "build": "ncc build www -m -o build",
-    "pack": "mkdir -p ../release && cp -rf build/* ../release && mkdir -p ../prebuilds && cp -rf node_modules/@serialport/bindings-cpp/prebuilds/* ../prebuilds",
+    "build": "ncc build www -m -o build -e ./config.json",
+    "pack": "rm -rf ../release && mkdir ../release && cp -r build/index.js ../release && cp -r ./config.json ../release && rm -rf ../prebuilds && mkdir ../prebuilds && cp -r node_modules/@serialport/bindings-cpp/prebuilds/* ../prebuilds && mkdir ../release/images && cp -r images/* ../release/images",
     "update": "npm install git+ssh://git@github.com:alxch/node-cashcode-bv.git"
   },
   "dependencies": {

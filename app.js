@@ -5,6 +5,7 @@ var logger = require('morgan');
 
 var apiRouter = require('./api');
 var setupRouter = require('./setup');
+var itemsRouter = require('./items');
 
 var app = express();
 
@@ -18,5 +19,6 @@ app.use('/', express.static(staticDir));
 app.use('/setup', express.static(staticDir));
 app.use('/api', apiRouter);
 app.use('/api/setup', setupRouter);
+app.use('/api/items', itemsRouter);
 
 module.exports = app;

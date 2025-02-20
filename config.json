@@ -1,0 +1,8 @@
+{
+  "stm": {
+    "path": "/dev/ttyUSB1"
+  },
+  "bill": {
+    "path": "/dev/ttyUSB0"
+  }
+}

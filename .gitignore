@@ -2,6 +2,8 @@ build/
 node
 package-lock.json
 data
+prebuilds
+# images
 
 # Logs
 logs

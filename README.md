@@ -102,16 +102,16 @@ FirewallRuleSet authenticated-users {
   FirewallRule block all
 }
 FirewallRuleSet preauthenticated-users {
+  FirewallRule allow tcp port 53
   FirewallRule allow udp port 53
   FirewallRule allow udp port 67
-  FirewallRule allow tcp port 53
   FirewallRule allow tcp port 3001 to 10.42.0.1
   FirewallRule allow tcp port 22 to 10.42.0.1
 }
 FirewallRuleSet users-to-router {
+  FirewallRule allow tcp port 53       
   FirewallRule allow udp port 53       
   FirewallRule allow udp port 67
-  FirewallRule allow tcp port 53       
   FirewallRule allow tcp port 3001 to 10.42.0.1
   FirewallRule allow tcp port 22 to 10.42.0.1
 }

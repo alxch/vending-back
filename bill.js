@@ -5,7 +5,7 @@ const log = console.log;
 
 const config = {
   "name": "Bill",
-  "path": "/dev/ttyUSB0",
+  "path": require('./config.json').bill.path,
 };
 const DEBUG = false;
 
