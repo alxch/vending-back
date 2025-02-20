@@ -22,7 +22,7 @@ router.post('/logout', async (req, res) => {
       token: user.token,
       status: 'done' 
     }));
-    log('Logout:', user);
+    log('Logout user:', user);
   } else {
     res.send(JSON.stringify({
       error:`User "${login}" is invalid or user has been already logged out`,
@@ -42,7 +42,7 @@ router.post('/login', async (req, res) => {
       token: user.token,
       status: 'done'
     }));
-    log('Login:', user);
+    log('Login user:', user);
   } else {
     user.token = '';
     log('Login:', user);
@@ -88,7 +88,7 @@ router.post('/auth', async (req, res) => {
         token:user.token, 
         status: 'done' 
       }));
-      log('Auth:', user);
+      log('Auth user:', user);
     } else {
       res.send(JSON.stringify({
         error:`User credentials are invalid`, 
