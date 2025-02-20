@@ -1,5 +1,5 @@
-// const { DelimiterParser } = require('@serialport/parser-delimiter');
 // const Serial = require('./serial');
+// const { DelimiterParser } = require('@serialport/parser-delimiter');
 const { BillValidator } = require('cashcode-bv');
 const log = console.log;
 
@@ -7,14 +7,13 @@ const config = {
   "name": "Bill",
   "path": "/dev/ttyUSB0",
 };
-const DEBUG = true;
+const DEBUG = false;
 
 class Bill extends BillValidator /* Serial */ {
   constructor(){
     // super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }));
     super(config.path, true);
     this.name = config.name;
-    if(DEBUG) return;
 
     this.connect().then(async()=>{
       log(`${this.name} info:`, this.info);
@@ -53,18 +52,36 @@ class Bill extends BillValidator /* Serial */ {
       return;
     }
 
-    
+    // real bills
+    this.on('escrow', async (bill) => {
+      console.log(`${this.name}:ACCEPTed ${bill.amount}`);
+      if(!onAccept) return;
+      const result = await onAccept(bill.amount);
+      if(result == '<') {
+        await this.stack();
+        return;
+      }
+      if(result == '=') {
+        await this.deactivate();
+        return;
+      }
+      if(result == '>'){
+        await this.retrieve();
+        return;
+      }
+    });
   }
 
   async deactivate(){
     if(!this.isActive()) throw new Error(`${this.name}:DEACTIVATEd already`);
 
+    this.active = false;
     if(DEBUG){
       await new Promise(resolve=>setTimeout(resolve,2000));
     } else {
       await this.end();
+      this.removeAllListeners('escrow');
     }
-    this.active = false;
     console.log(`${this.name}:DEACTIVATEd`);
   }
 }

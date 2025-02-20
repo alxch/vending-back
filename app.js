@@ -12,10 +12,11 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-const staticPath = path.join(__dirname, '');
-app.use(express.static(staticPath));
 
+const staticDir = path.join(__dirname, '');
+app.use('/', express.static(staticDir));
+app.use('/setup', express.static(staticDir));
 app.use('/api', apiRouter);
-app.use('/setup/api', setupRouter);
+app.use('/api/setup', setupRouter);
 
 module.exports = app;

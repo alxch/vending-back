@@ -10,8 +10,8 @@ router.use(cors());
 
 // TODO: handle unhandled errors
 const user = {
-  login: 'alex',
-  pass: 'wilbur53'
+  login: 'admin',
+  pass: 'SWG*setup'
 };
 let session = {token:'', auth:{login:'',pass:''}};
 let loginInProgress = '';

@@ -81,15 +81,16 @@ router.post('/select-payment-method', async (req, res) => {
 
         const onAccept = async(amount)=>{
           payment.cash.amount+= amount;
-          log(`Cash ammount:`, payment.cash.amount);
-
+          
           if(payment.cash.amount < item.price){ 
             payment.cash.error = null;
+            log(`Cash ammount:`, payment.cash.amount);
             return '<';
           }
           else if(payment.cash.amount > item.price){
             payment.cash.amount-= amount;
             payment.cash.error = `Too big value ${amount}`;
+            log(`Cash:`, payment.cash);
             return '>';
           }
           else {

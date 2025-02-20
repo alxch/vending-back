@@ -1,3 +1,17 @@
+# SSH with key
+```bash
+ssh -i ~/.ssh/custom_key_name SYSUSER@IP_ADDRESS_OF_SERVER
+ssh -i ~/vending/id_rsa VM00000@192.168.1.33
+
+```
+
+# Clone
+```bash
+fdisk -l
+sudo dd bs=4M if=/dev/sdb | gzip -9 > vending-`date +%d%m%y`.img.gz
+
+```
+
 # ILITEK
 
 ```bash
@@ -13,11 +27,17 @@ Section "InputClass"
 EndSection
 ```
 
-# Setup AP
+# Setup
 ```
 Password for AP and for system user.
-User: VM00001
-Pass: SWG*admin
+Login: VM00000
+Pass: SWG*wifi
+User/Pass: admin/SWG*setup
+SSH: alex/SWG*ssh
+Hostname: VM00000
+
+Preferences>AppearanceSettings>
+Chromium>Extensions and Settings
 ```
 
 # Node

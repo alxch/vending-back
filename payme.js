@@ -9,7 +9,7 @@ const DEBUG = false;
 //   maxAttempts: 4,
 //   attempt: 0
 // };
-const localStorage = new LocalStorage('data/payme');
+const localStorage = new LocalStorage(__dirname+'/data/payme');
 const config = {
   get order_id(){ return Number(localStorage.getItem('order_id')) },
   set order_id(value){ localStorage.setItem('order_id', value) },
