@@ -10,7 +10,7 @@ const {LocalStorage} = require('node-localstorage');
 const localStorage = new LocalStorage(__dirname+'/data');
 const user = require('./user').user;
 
-/** @type {{sold:number,key:string}[]} */
+/** @type {{count:number,sold:number,key:string}[]} */
 let items = JSON.parse(localStorage.getItem('items.json'));
 if(!items){
   // default

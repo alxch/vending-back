@@ -178,18 +178,22 @@ router.post('/deliver-item', async (req, res) => {
   try{
     const [row,col] = item.key.split('.');
     await stm.sel({row,col});
-    itemDelivered = true;
-    log(`ItemDelivered:`, itemDelivered);
-    initVars();
 
     // update items
     const itemKey = item.key; 
     const foundItem = items.find(item=>item.key == itemKey);
     if(foundItem){
       foundItem.sold++;
+      foundItem.count--;
       items.save();
       log('Item:',foundItem);
     }
+
+    // delivered
+    itemDelivered = true;
+    log(`ItemDelivered:`, itemDelivered);
+    initVars();
+
     res.send(JSON.stringify({itemDelivered, status: 'done'}));
   }
   catch(error){

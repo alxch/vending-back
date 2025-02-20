@@ -28,7 +28,7 @@ class Bill extends BillValidator /* Serial */ {
     if(this.isActive()) throw new Error(`${this.name}:ACTIVATEd already`);
 
     if(DEBUG){
-      await new Promise(resolve=>setTimeout(resolve,2000));
+      await new Promise(resolve=>setTimeout(resolve,1000));
     } else {
       await this.begin();
     }
