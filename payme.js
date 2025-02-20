@@ -9,10 +9,14 @@ const DEBUG = false;
 //   maxAttempts: 4,
 //   attempt: 0
 // };
-const localStorage = new LocalStorage(__dirname+'/data/payme');
+const localStorage = new LocalStorage(__dirname+'/data');
 const config = {
-  get order_id(){ return Number(localStorage.getItem('order_id')) },
-  set order_id(value){ localStorage.setItem('order_id', value) },
+  get order_id(){ 
+    return JSON.parse(localStorage.getItem('payme.json'))?.order_id || 0;
+  },
+  set order_id(value){ 
+    localStorage.setItem('payme.json', JSON.stringify({order_id:value}));
+  },
 }
 
 class Payme {
