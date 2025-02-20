@@ -27,7 +27,7 @@ router.post('/logout', async (req, res) => {
       token: user.token,
       status: 'done' 
     }));
-    log('Logout:', req.body);
+    log('Logout:', user);
   } else {
     res.send(JSON.stringify({
       error:`User "${login}" is invalid or user has been already logged out`,
@@ -41,21 +41,21 @@ router.post('/login', async (req, res) => {
   const {login,token} = req.body;
   
   await new Promise(resolve=>setTimeout(resolve, 1000));
-  if(user.login == login && user.token == token){
+  if(user.login == login && user.token == token && user.token){
     res.send(JSON.stringify({
       login: user.login,
       token: user.token,
       status: 'done'
     }));
-    log('Login:', req.body);
+    log('Login:', user);
   } else {
     user.token = '';
-    log('Login token:', user.token);
+    log('Login:', user);
     res.send(JSON.stringify({
-      error:`User "${login}" or token is invalid`,
+      error:`User ${login && `"${login}"`} not authorized`,
       status: 'error'
     }));
-    logError('Login:', req.body);
+    logError('Login:', req.body);      
   }
 });
 
@@ -93,13 +93,13 @@ router.post('/auth', async (req, res) => {
         token:user.token, 
         status: 'done' 
       }));
-      log('Auth token:', user.token);
+      log('Auth:', user);
     } else {
       res.send(JSON.stringify({
         error:`User credentials are invalid`, 
         status: 'error'
       }));
-      throw req.body;
+      logError('Auth:', req.body);
     }
   }
   catch(error){
