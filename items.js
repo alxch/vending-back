@@ -8,8 +8,9 @@ const logError = (...args) => {
 router.use(cors());
 const {LocalStorage} = require('node-localstorage');
 const localStorage = new LocalStorage(__dirname+'/data');
+const user = require('./user').user;
 
-const user = require('./user');
+/** @type {{sold:number,key:string}[]} */
 let items = JSON.parse(localStorage.getItem('items.json'));
 if(!items){
   // default
@@ -41,6 +42,9 @@ if(!items){
   ];
   localStorage.setItem('items.json', JSON.stringify(items));
 }
+items.save = () => {
+  localStorage.setItem('items.json', JSON.stringify(items));
+}
 log('Items:',items);
 
 router.get('/', async (req, res) => {
@@ -60,8 +64,9 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  items = req.body;
-  localStorage.setItem('items.json', JSON.stringify(items));
+  items.length = 0;
+  req.body.forEach(item=>items.push(item));
+  items.save();
   res.send(JSON.stringify({
     items,
     status: 'done' 
@@ -69,4 +74,4 @@ router.post('/', async (req, res) => {
   log('Items post:', items);
 });
 
-module.exports = router;
+module.exports = {items, router};

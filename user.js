@@ -17,4 +17,4 @@ if(!user){
 }
 log('User:', user);
 
-module.exports = user;
+module.exports = {user};

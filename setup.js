@@ -8,7 +8,7 @@ const logError = (...args) => {
 }
 router.use(cors());
 
-const user = require('./user');
+const user = require('./user').user;
 let loginInProgress = '';
 log(`LoginInProgress: "${loginInProgress}"`);
 

@@ -5,7 +5,7 @@ var logger = require('morgan');
 
 var apiRouter = require('./api');
 var setupRouter = require('./setup');
-var itemsRouter = require('./items');
+var itemsRouter = require('./items').router;
 
 var app = express();
 

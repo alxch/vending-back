@@ -6,6 +6,7 @@ router.use(cors());
 // router.use(async (req, res, next) => {
 //   next();
 // });
+const items = require('./items').items;
 
 // start devices
 const Stm = require('./stm');
@@ -180,12 +181,20 @@ router.post('/deliver-item', async (req, res) => {
     itemDelivered = true;
     log(`ItemDelivered:`, itemDelivered);
     initVars();
+
+    // update items
+    const itemKey = item.key; 
+    const foundItem = items.find(item=>item.key == itemKey);
+    if(foundItem){
+      foundItem.sold++;
+      items.save();
+      log('Item:',foundItem);
+    }
     res.send(JSON.stringify({itemDelivered, status: 'done'}));
   }
   catch(error){
     console.error('Deliver item:', error);
     itemDelivered = error;
-    log(`ItemDelivered:`, itemDelivered);
     res.status(500).send(JSON.stringify({error: itemDelivered.message, status: 'error'}));
   }
 });
