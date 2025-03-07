@@ -62,7 +62,8 @@ class Bill extends BillValidator /* Serial */ {
         return;
       }
       if(result == '=') {
-        await this.deactivate();
+        await this.stack();
+        setTimeout(async()=>await this.deactivate(), 2500);
         return;
       }
       if(result == '>'){

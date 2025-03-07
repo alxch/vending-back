@@ -35,9 +35,9 @@ class Serial extends EventEmitter{
     this.check();
     
     if(this.parser)
-      this.port.pipe(this.parser).removeListener('data', this.onRead);
+      this.port.pipe(this.parser).removeAllListeners('data');
     else
-      this.port.removeListener('data', this.onRead);
+      this.port.removeAllListeners('data');
   }
 
   async enableRead(){
@@ -45,9 +45,9 @@ class Serial extends EventEmitter{
     await this.flush();
 
     if(this.parser)
-      this.port.pipe(this.parser).on('data', this.onRead);
+      this.port.pipe(this.parser).on('data', data => this.onRead(data));
     else
-      this.port.on('data', this.onRead);
+      this.port.on('data', data => this.onRead(data));
   }
 
   onRead(data){

@@ -3,7 +3,7 @@ const Serial = require('./serial');
 const log = console.log;
 const config = {
   "name": "STM",
-  "baudRate": 115200,
+  "baudRate": 9600,
   "path": require('./config.json').stm.path,
   "autoStart": true 
 };
@@ -11,7 +11,10 @@ const DEBUG = false;
 
 class Stm extends Serial {
   constructor(){
-    super({...config, parser: new ByteLengthParser({ length: 2 })});
+    super({
+      ...config, 
+      parser: new ByteLengthParser({ length: 2 })
+    });
   }
 
   /** @returns {Promise<Boolean[]>} */
@@ -38,8 +41,8 @@ class Stm extends Serial {
       if(data[0] != cmd) {
         throw new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`);
       };
-      if(data[1] != 0x01) {
-        throw new Error(`${this.name}:SEL returned withe error ${data[1]}`);
+      if(data[1] != 0x00) {
+        throw new Error(`${this.name}:SEL returned with error ${data[1]}`);
       }
 
       res.push(true);
