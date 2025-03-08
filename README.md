@@ -9,6 +9,7 @@ ssh -i ~/vending/id_rsa VM00000@192.168.1.33
 ```bash
 fdisk -l
 sudo dd bs=4M if=/dev/sdb | gzip -9 > vending-`date +%d%m%y`.img.gz
+sudo dd bs=4M if=/dev/sdb of=vending-`date +%d%m%y`.img
 df -h
 sudo du -hs --max-depth=1 / | sort -h
 ```
