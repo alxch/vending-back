@@ -12,6 +12,9 @@ sudo dd bs=4M if=/dev/sdb | gzip -9 > vending-`date +%d%m%y`.img.gz
 sudo dd bs=4M if=/dev/sdb of=vending-`date +%d%m%y`.img
 df -h
 sudo du -hs --max-depth=1 / | sort -h
+
+https://raspberrypi.stackexchange.com/questions/120124/how-to-copy-sd-card-whithout-copying-the-unallocated-space
+https://github.com/seamusdemora/RonR-RPi-image-utils
 ```
 
 # ILITEK
