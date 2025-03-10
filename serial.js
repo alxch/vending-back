@@ -34,6 +34,7 @@ class Serial extends EventEmitter{
   async disableRead(){
     this.check();
     
+    log(`${this.name} read disabled.`);
     if(this.parser)
       this.port.pipe(this.parser).removeAllListeners('data');
     else
@@ -42,8 +43,8 @@ class Serial extends EventEmitter{
 
   async enableRead(){
     this.check();
-    await this.flush();
 
+    log(`${this.name} read enabled.`);
     if(this.parser)
       this.port.pipe(this.parser).on('data', data => this.onRead(data));
     else
@@ -67,8 +68,9 @@ class Serial extends EventEmitter{
     return await new Promise((resolve,reject) => {
       this.port = new SerialPort({ path:this.path, baudRate:this.baudRate, autoOpen: false });
       
-      this.port.once('open', () => { 
-        log(`${this.name} opened.`); 
+      this.port.once('open', async () => { 
+        log(`${this.name} opened.`);
+        await this.enableRead();
         resolve(true);
       });
 

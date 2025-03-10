@@ -27,7 +27,7 @@ class Stm extends Serial {
         }, 2000);
       })
     }
-    await this.enableRead(); // flush
+    await this.flush(); 
 
     const cmd = 0x01;
     /** @type {Buffer[]} */
@@ -36,7 +36,7 @@ class Stm extends Serial {
       await this.write(Buffer.from([cmd,row,col]));
       
       /** @type {Buffer} */
-      let data = await this.read();
+      let data = await this.read(30);
 
       if(data[0] != cmd) {
         throw new Error(`${this.name}:SEL must be ${cmd}, received ${data[0]}`);
@@ -49,7 +49,7 @@ class Stm extends Serial {
       log(`${this.name}:SEL ${item+1} of ${count} selected`);
     }
 
-    await this.disableRead();
+    // await this.disableRead();
     return res;
   }
 };
