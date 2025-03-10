@@ -1,3 +1,7 @@
+# GPIO
+https://github.com/fivdi/onoff
+https://github.com/fivdi/pigpio
+
 # SSH with key
 ```bash
 ssh -i ~/.ssh/custom_key_name SYSUSER@IP_ADDRESS_OF_SERVER
