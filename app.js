@@ -2,6 +2,15 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var pjson = require('./package.json');
+
+console.log(`
+************************************
+*                                  *   
+* ${(pjson.name + " " + pjson.version).padEnd(32)} *
+*                                  *
+************************************
+`);
 
 var apiRouter = require('./api');
 var setupRouter = require('./setup');
