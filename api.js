@@ -157,6 +157,7 @@ router.post('/select-payment-method', async (req, res) => {
     
     if(payment.method){
       payment[payment.method].error = error.message;
+      log(`Payment:`, payment);
     }
     res.status(500).send(JSON.stringify({
       error: error.message,
@@ -187,6 +188,9 @@ router.post('/deliver-item', async (req, res) => {
       foundItem.count--;
       items.save();
       log('Item:',foundItem);
+      // TODO: save sell transactions, because item can be changed/removed in future
+      // take into account payment method and timestamp
+      // add field `synced` for syncing to cloud
     }
 
     // delivered

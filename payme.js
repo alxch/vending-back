@@ -14,7 +14,8 @@ const config = {
   get order_id(){ 
     return JSON.parse(localStorage.getItem('payme.json'))?.order_id || 0;
   },
-  set order_id(value){ 
+  set order_id(value){
+    log('Payme order_id:', value); 
     localStorage.setItem('payme.json', JSON.stringify({order_id:value}));
   },
 }
@@ -43,6 +44,7 @@ class Payme {
 
     const result = await response.json();
     if(result.error){
+      console.error(`Payme:${method} error:`, response.error);
       throw new Error(`Payme:${method} error: ${result.error.message}:${result.error.code}`);
     }
     // log(`Payme:${method}`, result.result);
@@ -147,7 +149,7 @@ class Payme {
       catch(error){
         console.error(`Payme:CHECK error: `, error);
       }
-    }, 2000);
+    }, 3000);
     
     return result['receipt']['state'];
   }
