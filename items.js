@@ -26,7 +26,7 @@ if(!items){
     {
       sold: 0,
       count: 2,
-      key: '1.2',
+      key: '1.3',
       price: 2000,
       name: 'Coca-Cola\n200ml',
       src: './images/item-2.png'
@@ -34,7 +34,7 @@ if(!items){
     {
       sold: 0,
       count: 3,
-      key: '1.3',
+      key: '1.5',
       price: 3000,
       name: 'Coca-Cola\n300ml',
       src: './images/item-3.png'
