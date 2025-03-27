@@ -1,5 +1,5 @@
 node-cashcode-bv/
-# build/
+build/
 node
 package-lock.json
 data
