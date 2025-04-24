@@ -86,7 +86,7 @@ WantedBy=multi-user.target
 
 # Log
 ```bash
-journalctl -u vending.service -n 100 -f
+journalctl -u vending.service -n 1000 -f
 journalctl -u nodogsplash.service -n 100 -f
 ```
 

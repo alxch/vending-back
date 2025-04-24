@@ -1,5 +1,3 @@
-// const Serial = require('./serial');
-// const { DelimiterParser } = require('@serialport/parser-delimiter');
 const { BillValidator } = require('cashcode-bv');
 const log = console.log;
 
@@ -9,10 +7,9 @@ const config = {
 };
 const DEBUG = false;
 
-class Bill extends BillValidator /* Serial */ {
+class Bill extends BillValidator {
   constructor(){
-    // super({...config, parser: new DelimiterParser({ delimiter: '\r\n' }));
-    super(config.path, true);
+    super(config.path, false /* debug */);
     this.name = config.name;
 
     this.connect().then(async()=>{

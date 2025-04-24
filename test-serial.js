@@ -1,19 +1,26 @@
-// const { ByteLengthParser, DelimiterParser } = require('serialport');
-const Serial = require('./serial');
+const { ByteLengthParser, DelimiterParser } = require('serialport');
 const log = console.log;
+const Serial = require('./serial');
 
-const test = new Serial({
-  name: 'Test',
-  path: '/dev/ttyUSB0',
+const serial = new Serial({
+  name: 'STM',
+  path: '/dev/ttyUSB1',
   baudRate: 9600,
-  autoStart: true,
-  // parser: new DelimiterParser({ delimiter: '\r\n' }),
   // parser: new ByteLengthParser({ length: 2 }),
+  // parser: new DelimiterParser({ delimiter: '\r\n' }),
+  // autoStart: true,
 });
 
-// (async()=>{
-//   await test.start();
-//   await test.write(Buffer.from('34001f0000','hex'));
-//   await test.write(Buffer.from('3400000000','hex'));
-//   await test.read();
-// })();
+const test = async () => {
+  await serial.start();
+  await serial.flush();
+  const cmd = 0x01;
+  let row = 1, col = 1;
+  for(; row <= 6; row++){
+    for(; col <= 10; col++){
+      await serial.write(Buffer.from([cmd,row,col]));
+      await serial.read(10);
+    }
+  }
+}
+test();

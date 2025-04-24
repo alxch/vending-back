@@ -27,7 +27,7 @@ class Serial extends EventEmitter{
     this.path = path;
     this.baudRate = baudRate;
     if(autoStart){
-      this.start().then(log,log);
+      this.start();
     }
   }
 
@@ -44,15 +44,17 @@ class Serial extends EventEmitter{
   async enableRead(){
     this.check();
 
-    log(`${this.name} read enabled.`);
     if(this.parser)
       this.port.pipe(this.parser).on('data', data => this.onRead(data));
     else
-      this.port.on('data', data => this.onRead(data));
+    this.port.on('data', data => this.onRead(data));
+
+    log(`${this.name} read enabled`);
   }
 
   onRead(data){
-    log(`${this.name} data:`, data, '\x1b[32m\x1b[1m"'+data.toString()+'"\x1b[0m');
+    log(`${this.name} data:`, data, '\x1b[32m\x1b[1m"' + data.toString() + '"\x1b[0m');
+    
     this.packets.push(data);
     if(this.readPromise.resolve){
       const data = this.packets.shift();
@@ -69,9 +71,9 @@ class Serial extends EventEmitter{
       this.port = new SerialPort({ path:this.path, baudRate:this.baudRate, autoOpen: false });
       
       this.port.once('open', async () => { 
-        log(`${this.name} opened.`);
+        log(`${this.name} opened`);
         await this.enableRead();
-        resolve(true);
+        resolve();
       });
 
       this.port.on('error', error => { 
@@ -110,10 +112,12 @@ class Serial extends EventEmitter{
     }
     await new Promise(resolve => this.port.flush(resolve));
     this.packets = [];
+
     log(`${this.name} flushed`);
   }
 
   /**
+   * @param {number} [timeout=5] in seconds 
    * @returns {Promise<Buffer>}
    */
   async read(timeout = 5){
@@ -122,7 +126,7 @@ class Serial extends EventEmitter{
     if(this.packets.length > 0){
       const data = this.packets.shift();
       log(`${this.name} read:`, data);
-      return Promise.resolve(data);
+      return data;
     } else {
       if(!timeout) return Buffer.alloc(0);
       return Promise.race([
